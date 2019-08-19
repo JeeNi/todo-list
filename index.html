@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <canvas id="canvas" class="border" width="600" height="600">
+
+        </canvas>
+        <div>
+            <label>name:</label>
+            <input id="name"  type="text">
+        </div> 
+
+        <div>
+            <label>desc:</label>
+            <input id="desc" type="textarea">
+        </div>
+
+        <button id="mybutton" type="=button" onclick="onClick();">
+            HTML
+        </button>
+        
+        <script>
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const button = document.querySelector('#mybutton');
+
+            const rect = canvas.getBoundingClientRect();
+
+            const persons = [
+                {
+                    name: "은진",
+                    desc: "디발자가 되고 싶은 30대를 앞두고 있습니다."
+                },
+                {
+                    name: "한울",
+                    desc: "휴우.... 디발자 가르치기 참 힘들군요...",
+                    // selected: true
+                },
+                {
+                    name: "구절",
+                    desc: "못생긴 구절"
+                }
+            ]
+
+            const gap = 10;
+            const boxWidth = 600;
+            const boxHeight = 50;
+
+            window.addEventListener('load', () => {
+        
+            });
+            window.addEventListener('load', drawPersonList);
+
+            let x = 0;
+            let y = 0;
+            var isDrawing = false;
+
+            canvas.addEventListener('mousedown', e => {
+                x = e.clientX;
+                y = e.clientY;
+
+                // if (isDrawing === true) {
+                // selected = true;                        
+                // isDrawing = true;
+                // }
+
+                const currentY = e.clientY;
+                
+
+                console.log("x좌표 =" + x);
+                console.log("y좌표 =" + y);
+                
+            })
+
+            canvas.addEventListener('mousemove', e => {
+                if (isDrawing === true) {
+                   
+                }
+
+            })
+
+            canvas.addEventListener('mouseup', e => {
+                    isDrawing = false;
+
+            })
+
+            function drawPersonList () {
+                for(i = 0; i < persons.length; i++) {
+                    drawPersonAt(i, persons[i]);
+                }
+            }
+
+            function getPerson () {
+                const nameElement = document.getElementById("name");
+                const descElement = document.getElementById("desc");
+                
+                return {
+                    name: nameElement.value,
+                    desc: descElement.value
+                }
+            }
+
+            function drawPersonAt (position, persons) {
+                const currentY = position * (boxHeight + gap);
+                // if (persons.selected) {
+                //     ctx.fillStyle = "rgb(255, 165, 0)";
+                // } else {
+                //     ctx.fillStyle = "rgb(0, 0, 0)";
+                // } 
+
+                ctx.strokeRect(0, currentY, boxWidth, boxHeight);
+                ctx.fillText(persons.name, 30, currentY + 20);
+                ctx.fillText(persons.desc, 20, currentY + 30);
+            }
+
+            function onClick () {
+                const person = getPerson ();
+                drawPersonAt(persons.length, person);
+                persons.push(person);
+            }
+
+            function changeColor (position, changeColor) {
+                const currentY = position * (boxHeight + gap);
+
+                if (changeColor.selected) {
+                    ctx.strokeStyle = "rgb(255, 165, 0)";
+                }
+
+                ctx.strokeRect(0, currentY, boxWidth, boxHeight);
+            }
+
+        </script>
+        <style>
+            .border {
+                border: 1px solid red;
+            }
+        </style>
+    </body>
+</html>
