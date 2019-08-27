@@ -5,21 +5,29 @@
         <title>Todo list</title>
     </haed>
     <body>
-        <h1>Canvas Example</h1>
+        <h1>Todo-List</h1>
         <canvas id="canvas" class="border" width="600" height="600">
         </canvas>
         <div>
-            <label>name:</label>
-            <input id="name"  type="text">
+            <label>title:</label>
+            <input id="title"  type="text">
         </div> 
 
         <div>
-            <label>desc:</label>
-            <input id="desc" type="textarea">
+            <label>content:</label>
+            <input id="content" type="textarea">
         </div>
 
         <button id="mybutton" type="=button" onclick="onClick();">
-            HTML
+            ENTER
+        </button>
+
+        <button id="modifybutton" type="button" onclick="modify();">
+            MODIFY
+        </button>
+
+        <button id="deletebutton" type="button" onclick="remove();">
+            DELETE
         </button>
 
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>

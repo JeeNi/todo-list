@@ -5,19 +5,21 @@ const button = document.querySelector('#mybutton');
 
 const rect = canvas.getBoundingClientRect();
 let clickedBoxIndex = -1;
+console.log("clickedBoxIndex:" + clickedBoxIndex);
+let lastBoxIndex = -1;
 
 let persons = [
     {
-        name: "은진",
-        desc: "디발자가 되고 싶은 30대를 앞두고 있습니다."
+        title: "은진",
+        content: "디발자가 되고 싶은 30대를 앞두고 있습니다."
     },
     {
-        name: "한울",
-        desc: "휴우.... 디발자 가르치기 참 힘들군요...",
+        title: "한울",
+        content: "휴우.... 디발자 가르치기 참 힘들군요...",
     },
     {
-        name: "구절",
-        desc: "못생긴 구절"
+        title: "구절",
+        content: "못생긴 구절"
     }
 ]
 
@@ -33,29 +35,39 @@ const config = {
 
 window.addEventListener('load', () => {
     console.log('loaded');
-    
-    axios.get('http://localhost:8080/persons', config)
+    reload();
+});
+
+function reload() {
+    return axios.get('http://localhost:8080/persons', config)
         .then(response => {
             console.log(response.data);
             persons = response.data;
+            clearCanvas();
             drawPersonList();
 
         })
         .catch(e => {
             console.error(e);
         });
-});
+}
 // window.addEventListener('load', drawPersonList);
 
 let x = 0;
 let y = 0;
 
 canvas.addEventListener('mousedown', e => {
+    lastBoxIndex = -1;
+    
     x = e.clientX;
     y = e.clientY;
-    console.log(`{${x}, ${y}}`);
-    console.log(`Screen: {${e.screenX}, ${e.screenY}}`);
-    console.log(`Offet: {${e.offsetX}, ${e.offsetY}}`);
+    // console.log(`{${x}, ${y}}`);
+    // console.log(`Screen: {${e.screenX}, ${e.screenY}}`);
+    // console.log(`Offet: {${e.offsetX}, ${e.offsetY}}`);
+
+    const currentY = e.offsetY - yInClickedArea;
+    const currentX = e.offsetX - xInClickedArea;
+
     clickedBoxIndex = Math.floor(e.offsetY / (boxHeight + gap));
 
     if (clickedBoxIndex > (persons.length - 1)) {
@@ -67,14 +79,7 @@ canvas.addEventListener('mousedown', e => {
     isMoving = true;
     xInClickedArea = e.offsetX;
     yInClickedArea = e.offsetY - (clickedBoxIndex * (boxHeight + gap));
-    drawPersonList();
-    ctx.strokeStyle = "rgb(255, 0, 0)";
-    console.log(clickedBoxIndex);
 })
-
-function clearCanvas() {
-    ctx.clearRect(0, 0, 600, 600);
-}
 
 canvas.addEventListener('mousemove', e => {
     if (clickedBoxIndex !== -1 && isMoving === true) {
@@ -93,15 +98,14 @@ canvas.addEventListener('mousemove', e => {
         ctx.strokeStyle = "rgb(255, 0, 0)";
         ctx.fillStyle = "rgb(0, 0, 0)";
         ctx.strokeRect(currentX, currentY, boxWidth, boxHeight);
-        ctx.fillText(personSelected.name, currentX + 20, currentY + 20);
-        ctx.fillText(personSelected.desc, currentX + 20, currentY + 30);
+        ctx.fillText(personSelected.title, currentX + 20, currentY + 20);
+        ctx.fillText(personSelected.content, currentX + 20, currentY + 30);
     }
 })
 
 canvas.addEventListener('mouseup', e => {
     if (isMoving === true) {
         const person = persons.splice(clickedBoxIndex, 1)[0];
-        console.log(person);
         const targetBoxIndex = Math.floor(e.offsetY / (boxHeight + gap));
         if (targetBoxIndex < clickedBoxIndex) {
             persons.splice(targetBoxIndex - 1, 0, person);
@@ -119,13 +123,21 @@ canvas.addEventListener('mouseup', e => {
             drawPersonList();
         })
         .catch(e => console.error(e));
-
        
         isMoving = false;
 
         clickedBoxIndex = -1;
+        lastBoxIndex = Math.floor(e.offsetY / (boxHeight + gap));
+        
+        document.getElementById("title").value= persons[lastBoxIndex].title;
+        document.getElementById("content").value = persons[lastBoxIndex].content;
+
     }
 })
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, 600, 600);
+}
 
 function drawPersonList () {
     for(i = 0; i < persons.length; i++) {
@@ -134,28 +146,34 @@ function drawPersonList () {
 }
 
 function getPerson () {
-    const nameElement = document.getElementById("name");
-    const descElement = document.getElementById("desc");
+    const titleElement = document.getElementById("title");
+    const contentElement = document.getElementById("content");
 
-    
     return {
-        name: nameElement.value,
-        desc: descElement.value
+        title: titleElement.value,
+        content: contentElement.value
     }
 }
 
 function drawPersonAt (position, persons) {
     const currentY = position * (boxHeight + gap);
+    
     if (position === clickedBoxIndex) {
         ctx.strokeStyle = "rgb(255, 165, 0)";
-    } else {
+    }
+    else if(position === lastBoxIndex){
+        ctx.strokeStyle = "rgb(255, 0, 0)";
+        ctx.strokeRect(0, lastBoxIndex * (boxHeight + gap), boxWidth, boxHeight);
+        ctx.fillText(persons.title, 20, currentY + 20);
+        ctx.fillText(persons.content, 20, currentY + 30);
+    } 
+    else {
         ctx.strokeStyle = "rgb(0, 0, 0)";
         ctx.strokeRect(0, currentY, boxWidth, boxHeight);
-        ctx.fillText(persons.name, 20, currentY + 20);
-        ctx.fillText(persons.desc, 20, currentY + 30);
+        ctx.fillText(persons.title, 20, currentY + 20);
+        ctx.fillText(persons.content, 20, currentY + 30);
     }
 }
-
 
 // 선택된 박스의 인덱스 얻는다.
 // 인덱스로 부터 person을 얻는다.  persons[selectedIndex]
@@ -173,10 +191,8 @@ function drawPersonAt (position, persons) {
 // const nameEle = document.getElementById("name");
 // nameEle.value = person.nema;
 
-
 // const nameEle = document.getElementById("name");
 // nameEle.value
-
 
 // name;
 // desc
@@ -198,3 +214,28 @@ function onClick () {
     drawPersonAt(persons.length, person);
     persons.push(person);
 }
+
+function modify() {
+    const person = getPerson();
+    
+    axios.put('http://localhost:8080/persons/update', {
+        index: lastBoxIndex,
+        title: person.title,
+        content: person.content
+    }, config)
+        .then(res => reload())
+        .catch(e => console.error(e));
+}
+
+function remove() {
+    const person = getPerson();
+
+    axios.put('http://localhost:8080/persons/remove', {
+        index: lastBoxIndex,
+    }, config)
+        .then(res => reload())
+        .catch(e => console.error(e));
+
+        document.getElementById("title").value= " ";
+        document.getElementById("content").value = " ";
+};
